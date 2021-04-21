@@ -15,7 +15,7 @@ Statsmodels >= 0.11.1
 Biopython >= 1.77
 gffpandas >= 0.1.0
 ```
-Modules can be installed using pip or conda (Note: gffpandas can't be installed via conda, and it's unnecessary if user just use build-in gene models). 
+Modules can be installed using pip or conda. Note that gffpandas cannot be installed via conda, but is only necessary if generating custom gene model files. 
 ```
 pip install --user pandas numpy scipy pysam statsmodels biopython gffpandas
 conda install -c bioconda blast==2.9.0
@@ -26,7 +26,7 @@ conda install  pandas numpy scipy pysam statsmodels biopython
 conda install -c bioconda blast==2.9.0
 pip install gffpandas
 ```
-If genome assembly is belonged to hg19/hg38/mm10, the subcommand `prepare` can be skipped, module `gffpandas` is not required.
+Gene model files for the hg19 and hg38 human and mm10 mouse genome assemblies are provided with cDNA-detector. The subcommand `prepare` is only necessary when generating gene models for other species, assemblies or custom amplicons.
 
 ## Installation
 ```
