@@ -39,17 +39,17 @@ Then add cdna-detector into your PATH.
 
 
 ## Usage
-`cDNA-detector` consists of 3 steps (subcommands):
+`cDNA-detector` consists of three steps (subcommands):
 
 1. `prepare`: Generate gene model file [optional]
-2. `detect`: Detect candidate contaminant cDNA in bam files
-3. `clean`: Clean up cDNA in bam files [optional]
+2. `detect`: Detect candidate contaminant cDNA in bam file
+3. `clean`: Clean up cDNA in bam file [optional]
 
 Details and examples are shown below.
 
 
 ### 1. prepare: Generate gene model file [optional]
-`cdna-detector` relies on a species-specific gene model file to search for possible contaminant genes. We provide gene models for hg19/hg38/mm10 with this distribution. This step is only required for other species/assemblies. The gene model file needs to be created only once. 
+`cdna-detector` relies on a species and assembly-specific gene model file to search for possible contaminant genes. We provide gene models for hg19/hg38/mm10 with this distribution. The 'prepare' step is thus only required for other species/assemblies or custom amplicon sets. The gene model file needs to be created only once. 
 Built-in gene models are
 ```
 hg19
@@ -59,10 +59,10 @@ hg38_nochr
 mm10
 mm39
 ```
-Gene models `hg19_nochr` and `hg38_nochr` are used for reference genomes which chromosome names are not started with "chr".
+Gene models `hg19_nochr` and `hg38_nochr` are used for reference genomes where chromosome names do not start with "chr".
 #### Human hg19/hg38
 Gene models ready for use are provided in diretory `data/gene_model`. 
-And hg19/hg38 are equivalent to gene models files in the directory. Examples are showned on the section `2. detect: detecting cDNA contamination in BAM files`.
+And hg19/hg38 are equivalent to gene model files in the directory. Please see section 2 for usage examples. 
 
 #### Mouse mm10/mm39
 Gene models are generated in diretory `data/gene_model`. 
@@ -71,7 +71,7 @@ Users can use these files directly. And mm10/mm39 is equivalent to gene model fi
 #### Other species/assemblies
 **usage**
 ```
-cdna-detector.py prepare --annotation <gtf/bed> --genome <genome sequence>  [options]
+cdna-detector.py prepare --annotation <gtf/bed> --genome <genome sequenc filee>  [options]
 ```
 **example**
 ```
@@ -81,7 +81,7 @@ cdna-detector  prepare --annotation  example_data/gtf_example/test.gtf --output_
 
 **Input parameters**
 ```
-usage: cdna-detector.py prepare --annotation <gtf/bed> --genome <genome sequence>  [options]
+usage: cdna-detector.py prepare --annotation <gtf/bed> --genome <genome sequence file>  [options]
 
 required arguments:
   --annotation          gene annotation files
@@ -120,8 +120,8 @@ optional arguments:
                         attribute to show transcript id. 
                         - default transcript_id
 ```
-`annotation` input file can be GTF or BED format, `genome` are genome sequences. The chromosome names in genome sequences must be consistent with chromosome names in GTF/BED files.
-If input file are BED format, only first 3 or 4 columns will be required and used. Details can be identified in [BED format](https://genome.ucsc.edu/FAQ/FAQformat.html#format1.com).
+`annotation` input file can be GTF or BED format, `genome` is the genome sequence. The chromosome names in the genome sequences must be consistent with chromosome names in GTF/BED files.
+If the input file is in BED format, only the first 3 or 4 columns will be required and used. Details can be found in [BED format](https://genome.ucsc.edu/FAQ/FAQformat.html#format1.com).
 
 By default, chrM is excluded due to high read accumulation in sequencing experiments. It can be added back to the analysis workflow with `--chr_include chrM`.
 
@@ -131,7 +131,7 @@ By default, chrM is excluded due to high read accumulation in sequencing experim
 1. `GtfFileName.saf`: Gene model file. This file contains gene exon regions and boundary positions. This files is required for step `detect`.
 2. `GtfFileName.prepare.log`: Log file.
 
-Here're first several lines in the file `GtfFileName.saf`.
+Here are the first several lines of the file `GtfFileName.saf`.
 
 | seqname | start  | end    | gene_id | gene_name | transcript_id | exon_flank_start20   | exon_flank_end20     | is_exon_boundary_start | is_exon_boundary_end | exon_boundary_start_nearseq20 | exon_boundary_end_nearseq20 |
 |---------|--------|--------|---------|-----------|---------------|----------------------|----------------------|------------------------|----------------------|-------------------------------|-----------------------------|
@@ -141,8 +141,7 @@ Here're first several lines in the file `GtfFileName.saf`.
 | chr1    | 902084 | 902183 | PLEKHN1 | PLEKHN1   | NM_001160184  | CCCCTTGCCTTGTCCCCAGA | TGAGCGCGGCGTGCACGGTG | 0                      | 0                    | CCTCGCTGAAGGGAAACAGG          | ACATCCTGGACCTGGAGAAC        |
 | chr1    | 902084 | 902183 | PLEKHN1 | PLEKHN1   | NM_001367552  | CCCCTTGCCTTGTCCCCAGA | TGAGCGCGGCGTGCACGGTG | 0                      | 0                    | CCTCGCTGAAGGGAAACAGG          | ACATCCTGGACCTGGAGAAC        |
 
-Users can provide several required information about exon regions, such as seqname, start, end, gene_id, gene_name, then fill columns `is_exon_boundary_start` and `is_exon_boundary_end` with number 0. Fill transcript with transcript id or gene id (If no transcript id.). Leave other columns blank.
-And the gene model file is used in the `cdna-detector detect`.
+Users can provide several required columns for exon regions, such as seqname, start, end, gene_id, gene_name, then fill columns `is_exon_boundary_start` and `is_exon_boundary_end` with 0. Fill transcript with transcript id or gene id (If no transcript id.). Leave other columns blank.
 
 
 ### 2. detect: detecting cDNA contamination in BAM files
