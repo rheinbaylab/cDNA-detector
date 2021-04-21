@@ -1,0 +1,2 @@
+gene_id	gene_name	transcript_id	num_exon_detected	num_exon_transcript	ratio	combined_pvalue	avg_log10pvalue	avg_pvalue	avg_cDNA	median_cDNA	source_inference	source_known_databases
+MTOR	MTOR	NM_004958	57	57	1.0	0.0	-6.801539576221238	0.062239274095440056	61.79824561403509	55.5	vector	None

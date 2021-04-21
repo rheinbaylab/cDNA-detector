@@ -1,0 +1,6 @@
+2021-04-21 11:45:17,988 - INFO - clean region file is: example_data/output_clean/tmp_sample.clean_region.tsv
+2021-04-21 11:45:17,989 - INFO - uncleaned bam file is: example_data/bam_file/tmp.sample.bam
+2021-04-21 11:45:18,004 - INFO - assign reads for gene: MTOR
+2021-04-21 11:46:26,676 - INFO - generate clean bam file
+2021-04-21 11:46:29,847 - INFO - generate statistic file
+2021-04-21 11:46:29,859 - INFO - Program finished successfully

@@ -1,0 +1,11 @@
+2021-04-21 11:43:24,659 - INFO - input file is example_data/gtf_example/test.gtf
+2021-04-21 11:43:24,660 - INFO - output file is /data/rheinbay_lab/meifang/project/cdna_contamination/bin/03.cDNA_contamination/00.git/cDNA_detector/example_data/output_prepare/test.saf
+2021-04-21 11:43:24,660 - INFO - begin ...............
+2021-04-21 11:43:24,660 - INFO - loading annotation files: be patient, a little slow
+2021-04-21 11:43:24,715 - INFO - finished!!!
+2021-04-21 11:43:24,716 - INFO - filter chromosomes
+2021-04-21 11:43:24,717 - INFO - extract exon boundary sequences
+2021-04-21 11:43:25,027 - INFO - gene model files haved been generated
+2021-04-21 11:43:25,027 - INFO - 47 coding exons have been used
+2021-04-21 11:43:25,028 - INFO - please use the following gene model file in the next subcommand detect:
+2021-04-21 11:43:25,028 - INFO - /data/rheinbay_lab/meifang/project/cdna_contamination/bin/03.cDNA_contamination/00.git/cDNA_detector/example_data/output_prepare/test.saf

@@ -1,0 +1,9 @@
+2021-04-21 11:43:27,727 - INFO - Begin to process sample: example_data/bam_file/tmp.sample.bam
+2021-04-21 11:43:50,877 - INFO - Start scanning exon regions...
+2021-04-21 11:44:16,554 - INFO - Proportion of soft-clipped reads is: 0.104
+
+2021-04-21 11:45:08,045 - INFO - Evaluating 1 potential candidate cDNA(s) ......
+2021-04-21 11:45:08,047 - INFO - MTOR
+2021-04-21 11:45:15,121 - INFO - Running blastn for inferring sources
+2021-04-21 11:45:16,986 - INFO - Program finished successfully
+2021-04-21 11:45:16,987 - INFO - 1 cDNA detected
