@@ -23,7 +23,8 @@ conda install -c bioconda blast==2.9.0
 ```
 or
 ```
-conda install  pandas numpy scipy pysam statsmodels biopython joblib
+conda install  pandas numpy scipy statsmodels biopython joblib
+conda install -c bioconda pysam
 conda install -c bioconda blast==2.9.0
 pip install gffpandas
 ```
