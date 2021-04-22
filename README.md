@@ -13,16 +13,17 @@ scipy >= 1.1.0
 pysam >= 0.15.0
 Statsmodels >= 0.11.1
 Biopython >= 1.77
+joblib >= 0.15.1
 gffpandas >= 0.1.0
 ```
 Modules can be installed using pip or conda. Note that gffpandas cannot be installed via conda, but is only necessary if generating custom gene model files. 
 ```
-pip install --user pandas numpy scipy pysam statsmodels biopython gffpandas
+pip install --user pandas numpy scipy pysam statsmodels biopython gffpandas joblib
 conda install -c bioconda blast==2.9.0
 ```
 or
 ```
-conda install  pandas numpy scipy pysam statsmodels biopython 
+conda install  pandas numpy scipy pysam statsmodels biopython joblib
 conda install -c bioconda blast==2.9.0
 pip install gffpandas
 ```
