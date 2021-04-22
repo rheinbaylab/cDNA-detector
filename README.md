@@ -120,7 +120,7 @@ optional arguments:
                         attribute to show transcript id. 
                         - default transcript_id
 ```
-`annotation` input file can be GTF or BED format, `genome` is the genome sequence. The chromosome names in the genome sequences must be consistent with chromosome names in GTF/BED files.
+`annotation` input file can be in GTF or BED format, `genome` is the genome sequence. The chromosome names in the genome sequences must be consistent with chromosome names in GTF/BED files.
 If the input file is in BED format, only the first 3 or 4 columns will be required and used. Details can be found in [BED format](https://genome.ucsc.edu/FAQ/FAQformat.html#format1.com).
 
 By default, chrM is excluded due to high read accumulation in sequencing experiments. It can be added back to the analysis workflow with `--chr_include chrM`.
@@ -145,7 +145,7 @@ Users can provide several required columns for exon regions, such as seqname, st
 
 
 ### 2. detect: detecting cDNA contamination in BAM files
-`cdna-detector detect` searches for possible cDNA contamination in BAM files using the predefined gene model file. `cdna-detector detect` outputs several files, including original statistics about candidate contaminant exons and genes, high-confidence filtered exons and genes, and coordinate files containing the positions of genes with suspected contaminations for use with the `clean` step.
+`cdna-detector detect` searches for possible cDNA contamination in BAM-formatted sequence alignments using the predefined gene model file. `cdna-detector detect` outputs several files, including original statistics about candidate contaminant exons and genes, high-confidence filtered exons and genes, and coordinate files containing the positions of genes with suspected contaminations for use with the `clean` step.
 
 **Usage**
 ```
@@ -230,7 +230,7 @@ optional arguments:
 
 **Output files**
 
-If cDNAs are detected, `cdna-detector detect` outputs several files. If 0 cDNA is detected in input files, only 1 file `SAMPLE_ID.log` will be generated.
+If cDNAs are detected, `cdna-detector detect` outputs several files. If no cDNA is detected in the input, only the `SAMPLE_ID.log` log file will be generated.
 Important files are explained below:
 
 1. `SAMPLE_ID.log`: log file.
@@ -241,12 +241,12 @@ Important files are explained below:
 6. `SAMPLE_ID.gene_statistics.filtered.source_filtered.tsv`: filtered results containing only "high-confidence" candidate contaminant genes from user-defined sources.
 7. `SAMPLE_ID.merge_region.tsv`:  merged exon regions which can be used in the "clean" step (see below).
 8. `SAMPLE_ID.merge_region.bed`:  merged exon regions which can be used in IGV for manually checking results.
-9. `SAMPLE_ID.clipped_seq.source_inference.tsv`: cDNA's inferred sources are listed in the file.
+9. `SAMPLE_ID.clipped_seq.source_inference.tsv`: Inferred source (vector or retrogene) for each candidate cDNA, if enough evidence is available.
 
 
-For most cases, users can only check `SAMPLE_ID.gene_statistics.filtered.source_filtered.tsv`, which describes cDNAs in the BAM files. And don't forget to check cDNAs on IGV with `SAMPLE_ID.merge_region.bed`, which can validate the results quickly. 
+For most cases, users can only check `SAMPLE_ID.gene_statistics.filtered.source_filtered.tsv`, which describes high-confidence cDNAs in the BAM file. It is recommended to review cDNA calls in IGV with `SAMPLE_ID.merge_region.bed`. 
 
-**Important Note**: Be careful with cDNAs which are detected with only 1 exon. They might be false positive results.
+**Important Note**: cDNAs where only one exon scored as significant can represent a false positive and should be reviewed.
 
 Description of columns in `SAMPLE_ID.gene_statistics.tsv`, `SAMPLE_ID.gene_statistics.filter.tsv` and `SAMPLE_ID.gene_statistics.filtered.source_filtered.tsv`:
 
@@ -256,7 +256,7 @@ Description of columns in `SAMPLE_ID.gene_statistics.tsv`, `SAMPLE_ID.gene_stati
 | gene_name             | gene name                                                            |
 | transcript_id         | transcript id                                                        |
 | num_exon_detected     | number of exons detected                                             |
-| num_exon_transcript   | number of exons of the transcript                                    |
+| num_exon_transcript   | number of exons in the transcript                                    |
 | ratio                 | ratio of detected exons to all exons in transcript                   |
 | source_inference      | possible source of detected cDNAs inferred by cDNA-detector          |
 | source_known_databases| known source of detected cDNAs defined by users or built-in databases|
@@ -283,7 +283,7 @@ Description of columns in `SAMPLE_ID.exon_statistics.tsv` and `SAMPLE_ID.exon_st
 | transcript          | transcript name                                                     |
 | num_clipped_start   | number of clipped reads overlapping start of candidate region       |
 | num_total_start     | number of total reads at start position of candidate region         |
-| bbinom_pvalue_start | binomial p-values at start position of candidate region             |
+| bbinom_pvalue_start | binomial p-value at start position of candidate region             |
 | num_clipped_end     | number of clipped reads at end position of candidate region         |
 | num_total_end       | number of total reads at end position of candidate region           |
 | bbinom_pvalue_end   | binomial p-value at end position of candidate region                |
@@ -297,8 +297,8 @@ Description of columns in `SAMPLE_ID.exon_statistics.tsv` and `SAMPLE_ID.exon_st
 
 
 
-### 3. clean up cDNA in DNA-Seq experiment BAM file
-`cdna-detector clean` utilizes `SAMPLE_ID.merge_region.tsv` generated in the previous step `cdna-detector detect` and the source BAM file, then generates a "clean" BAM files by removing identified contaminant reads from candidate regions.
+### 3. clean up cDNA in BAM file
+`cdna-detector clean` utilizes `SAMPLE_ID.merge_region.tsv` generated in the previous step `cdna-detector detect` and the source BAM file, then generates a "clean" BAM file by removing identified contaminant reads from candidate regions.
 
 **Usage**
 ```
@@ -331,7 +331,7 @@ optional arguments:
   --gDNA_remove         by default, reads identified as genomic DNA (gDNA) will be kept in exon regions. If the user suspects all reads in a given exon are contaminant reads, add this flag
 ```
 
-By default, `cdna-detector clean` estimates the quantity of cDNA in a candidate region based on cDNA detected in exon boundaries. Sometimes, this is not accurate. In this case, the user has the option to set `method` to rpm or fraction to estimate quantity of cDNA manually (i.e after alignment review in IGV). This can be useful when all reads in a candidate exon regions stem from contaminating cDNA.
+By default, `cdna-detector clean` estimates the fraction of cDNA in a candidate region based on cDNA detected in exon boundaries. Sometimes, this is not accurate. In this case, the user has the option to set `method` to rpm or fraction to estimate quantity of cDNA manually (i.e after alignment review in IGV). This can be useful when all reads in a candidate exon regions stem from contaminating cDNA.
 
 ```
 cdna-detector clean --bam example_data/bam_file/tmp.sample.bam  --sample_id tmp_sample --region example_data/output_detect/tmp_sample.merge_region.tsv   --output_dir example_data/output_clean
@@ -342,8 +342,8 @@ cdna-detector clean --bam example_data/bam_file/tmp.sample.bam  --sample_id tmp_
 `cdna-detector clean` outputs 4 files:
 
 1. `SAMPLEID.clean.log`: log file.
-2. `SAMPLEID.clean.bam`: clean bam file.
-3. `SAMPLEID.clean.bam`: index of clean bam file.
+2. `SAMPLEID.clean.bam`: clean BAM file.
+3. `SAMPLEID.clean.bam`: index for clean BAM file.
 4. `SAMPLEID.clean_region.tsv`: cleaned regions and detailed information about how much cDNA was removed in each region. Useful for manual cDNA removal. [ If `method` is rpm or fraction, this file will not be generated ]
 
 Example `SAMPLEID.clean_region.tsv`.
