@@ -198,7 +198,10 @@ def f_filter_genelist_step1(df_transcript_exon, df_gene_exon):
     df_gene_exon['pvalue'] = df_gene_exon.pvalue.fillna(1)
     df_gene_exon_expand = df_gene_exon_expand.merge(df_gene_exon, on = 'region', suffixes = ['','y'])
     df_gene_exon_expand['pvalue_transcript'] = df_gene_exon_expand.groupby(['transcript_id'])['pvalue'].transform(f_combin_p)
-    df_gene_exon_expand['fdr_transcript'] = fdrcorrection(df_gene_exon_expand['pvalue_transcript'])[1]
+    # df_gene_exon_expand['fdr_transcript'] = fdrcorrection(df_gene_exon_expand['pvalue_transcript'])[1]
+    tmp_df = df_gene_exon_expand.filter(['transcript_id','pvalue_transcript']).drop_duplicates()
+    tmp_df['fdr_transcript'] = fdrcorrection(tmp_df['pvalue_transcript'])[1]
+    df_gene_exon_expand = df_gene_exon_expand.merge(tmp_df.filter(['transcript_id','fdr_transcript']))
     tmp_genelist_filter1 = df_gene_exon_expand.query('pvalue_transcript<=@global_para.cutoff_pvalue').gene_name.unique().tolist()
     if len(tmp_genelist_filter1) <= 100:
         tmp_genelist_filter = tmp_genelist_filter1
