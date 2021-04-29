@@ -13,20 +13,22 @@ scipy >= 1.1.0
 pysam >= 0.15.0
 Statsmodels >= 0.11.1
 Biopython >= 1.77
+joblib >= 0.15.1
 gffpandas >= 0.1.0
 ```
-Modules can be installed using pip or conda (Note: gffpandas can't be installed via conda, and it's unnecessary if user just use build-in gene models). 
+Modules can be installed using pip or conda. Note that gffpandas cannot be installed via conda, but is only necessary if generating custom gene model files. 
 ```
-pip install --user pandas numpy scipy pysam statsmodels biopython gffpandas
+pip install --user pandas numpy scipy pysam statsmodels biopython gffpandas joblib
 conda install -c bioconda blast==2.9.0
 ```
 or
 ```
-conda install  pandas numpy scipy pysam statsmodels biopython 
+conda install  pandas numpy scipy statsmodels biopython joblib
+conda install -c bioconda pysam
 conda install -c bioconda blast==2.9.0
 pip install gffpandas
 ```
-If genome assembly is belonged to hg19/hg38/mm10, the subcommand `prepare` can be skipped, module `gffpandas` is not required.
+Gene model files for the hg19 and hg38 human and mm10 mouse genome assemblies are provided with cDNA-detector. The subcommand `prepare` is only necessary when generating gene models for other species, assemblies or custom amplicons.
 
 ## Installation
 ```
@@ -39,17 +41,17 @@ Then add cdna-detector into your PATH.
 
 
 ## Usage
-`cDNA-detector` consists of 3 steps (subcommands):
+`cDNA-detector` consists of three steps (subcommands):
 
 1. `prepare`: Generate gene model file [optional]
-2. `detect`: Detect candidate contaminant cDNA in bam files
-3. `clean`: Clean up cDNA in bam files [optional]
+2. `detect`: Detect candidate contaminant cDNA in bam file
+3. `clean`: Clean up cDNA in bam file [optional]
 
 Details and examples are shown below.
 
 
 ### 1. prepare: Generate gene model file [optional]
-`cdna-detector` relies on a species-specific gene model file to search for possible contaminant genes. We provide gene models for hg19/hg38/mm10 with this distribution. This step is only required for other species/assemblies. The gene model file needs to be created only once. 
+`cdna-detector` relies on a species and assembly-specific gene model file to search for possible contaminant genes. We provide gene models for hg19/hg38/mm10 with this distribution. The 'prepare' step is thus only required for other species/assemblies or custom amplicon sets. The gene model file needs to be created only once. 
 Built-in gene models are
 ```
 hg19
@@ -59,10 +61,10 @@ hg38_nochr
 mm10
 mm39
 ```
-Gene models `hg19_nochr` and `hg38_nochr` are used for reference genomes which chromosome names are not started with "chr".
+Gene models `hg19_nochr` and `hg38_nochr` are used for reference genomes where chromosome names do not start with "chr".
 #### Human hg19/hg38
 Gene models ready for use are provided in diretory `data/gene_model`. 
-And hg19/hg38 are equivalent to gene models files in the directory. Examples are showned on the section `2. detect: detecting cDNA contamination in BAM files`.
+And hg19/hg38 are equivalent to gene model files in the directory. Please see section 2 for usage examples. 
 
 #### Mouse mm10/mm39
 Gene models are generated in diretory `data/gene_model`. 
@@ -71,7 +73,7 @@ Users can use these files directly. And mm10/mm39 is equivalent to gene model fi
 #### Other species/assemblies
 **usage**
 ```
-cdna-detector.py prepare --annotation <gtf/bed> --genome <genome sequence>  [options]
+cdna-detector.py prepare --annotation <gtf/bed> --genome <genome sequenc filee>  [options]
 ```
 **example**
 ```
@@ -81,7 +83,7 @@ cdna-detector  prepare --annotation  example_data/gtf_example/test.gtf --output_
 
 **Input parameters**
 ```
-usage: cdna-detector.py prepare --annotation <gtf/bed> --genome <genome sequence>  [options]
+usage: cdna-detector.py prepare --annotation <gtf/bed> --genome <genome sequence file>  [options]
 
 required arguments:
   --annotation          gene annotation files
@@ -120,8 +122,8 @@ optional arguments:
                         attribute to show transcript id. 
                         - default transcript_id
 ```
-`annotation` input file can be GTF or BED format, `genome` are genome sequences. The chromosome names in genome sequences must be consistent with chromosome names in GTF/BED files.
-If input file are BED format, only first 3 or 4 columns will be required and used. Details can be identified in [BED format](https://genome.ucsc.edu/FAQ/FAQformat.html#format1.com).
+`annotation` input file can be in GTF or BED format, `genome` is the genome sequence. The chromosome names in the genome sequences must be consistent with chromosome names in GTF/BED files.
+If the input file is in BED format, only the first 3 or 4 columns will be required and used. Details can be found in [BED format](https://genome.ucsc.edu/FAQ/FAQformat.html#format1.com).
 
 By default, chrM is excluded due to high read accumulation in sequencing experiments. It can be added back to the analysis workflow with `--chr_include chrM`.
 
@@ -131,7 +133,7 @@ By default, chrM is excluded due to high read accumulation in sequencing experim
 1. `GtfFileName.saf`: Gene model file. This file contains gene exon regions and boundary positions. This files is required for step `detect`.
 2. `GtfFileName.prepare.log`: Log file.
 
-Here're first several lines in the file `GtfFileName.saf`.
+Here are the first several lines of the file `GtfFileName.saf`.
 
 | seqname | start  | end    | gene_id | gene_name | transcript_id | exon_flank_start20   | exon_flank_end20     | is_exon_boundary_start | is_exon_boundary_end | exon_boundary_start_nearseq20 | exon_boundary_end_nearseq20 |
 |---------|--------|--------|---------|-----------|---------------|----------------------|----------------------|------------------------|----------------------|-------------------------------|-----------------------------|
@@ -141,12 +143,11 @@ Here're first several lines in the file `GtfFileName.saf`.
 | chr1    | 902084 | 902183 | PLEKHN1 | PLEKHN1   | NM_001160184  | CCCCTTGCCTTGTCCCCAGA | TGAGCGCGGCGTGCACGGTG | 0                      | 0                    | CCTCGCTGAAGGGAAACAGG          | ACATCCTGGACCTGGAGAAC        |
 | chr1    | 902084 | 902183 | PLEKHN1 | PLEKHN1   | NM_001367552  | CCCCTTGCCTTGTCCCCAGA | TGAGCGCGGCGTGCACGGTG | 0                      | 0                    | CCTCGCTGAAGGGAAACAGG          | ACATCCTGGACCTGGAGAAC        |
 
-Users can provide several required information about exon regions, such as seqname, start, end, gene_id, gene_name, then fill columns `is_exon_boundary_start` and `is_exon_boundary_end` with number 0. Fill transcript with transcript id or gene id (If no transcript id.). Leave other columns blank.
-And the gene model file is used in the `cdna-detector detect`.
+Users can provide several required columns for exon regions, such as seqname, start, end, gene_id, gene_name, then fill columns `is_exon_boundary_start` and `is_exon_boundary_end` with 0. Fill transcript with transcript id or gene id (If no transcript id.). Leave other columns blank.
 
 
 ### 2. detect: detecting cDNA contamination in BAM files
-`cdna-detector detect` searches for possible cDNA contamination in BAM files using the predefined gene model file. `cdna-detector detect` outputs several files, including original statistics about candidate contaminant exons and genes, high-confidence filtered exons and genes, and coordinate files containing the positions of genes with suspected contaminations for use with the `clean` step.
+`cdna-detector detect` searches for possible cDNA contamination in BAM-formatted sequence alignments using the predefined gene model file. `cdna-detector detect` outputs several files, including original statistics about candidate contaminant exons and genes, high-confidence filtered exons and genes, and coordinate files containing the positions of genes with suspected contaminations for use with the `clean` step.
 
 **Usage**
 ```
@@ -231,7 +232,7 @@ optional arguments:
 
 **Output files**
 
-If cDNAs are detected, `cdna-detector detect` outputs several files. If 0 cDNA is detected in input files, only 1 file `SAMPLE_ID.log` will be generated.
+If cDNAs are detected, `cdna-detector detect` outputs several files. If no cDNA is detected in the input, only the `SAMPLE_ID.log` log file will be generated.
 Important files are explained below:
 
 1. `SAMPLE_ID.log`: log file.
@@ -242,12 +243,12 @@ Important files are explained below:
 6. `SAMPLE_ID.gene_statistics.filtered.source_filtered.tsv`: filtered results containing only "high-confidence" candidate contaminant genes from user-defined sources.
 7. `SAMPLE_ID.merge_region.tsv`:  merged exon regions which can be used in the "clean" step (see below).
 8. `SAMPLE_ID.merge_region.bed`:  merged exon regions which can be used in IGV for manually checking results.
-9. `SAMPLE_ID.clipped_seq.source_inference.tsv`: cDNA's inferred sources are listed in the file.
+9. `SAMPLE_ID.clipped_seq.source_inference.tsv`: Inferred source (vector or retrogene) for each candidate cDNA, if enough evidence is available.
 
 
-For most cases, users can only check `SAMPLE_ID.gene_statistics.filtered.source_filtered.tsv`, which describes cDNAs in the BAM files. And don't forget to check cDNAs on IGV with `SAMPLE_ID.merge_region.bed`, which can validate the results quickly. 
+For most cases, users can only check `SAMPLE_ID.gene_statistics.filtered.source_filtered.tsv`, which describes high-confidence cDNAs in the BAM file. It is recommended to review cDNA calls in IGV with `SAMPLE_ID.merge_region.bed`. 
 
-**Important Note**: Be careful with cDNAs which are detected with only 1 exon. They might be false positive results.
+**Important Note**: cDNAs where only one exon scored as significant can represent a false positive and should be reviewed.
 
 Description of columns in `SAMPLE_ID.gene_statistics.tsv`, `SAMPLE_ID.gene_statistics.filter.tsv` and `SAMPLE_ID.gene_statistics.filtered.source_filtered.tsv`:
 
@@ -257,7 +258,7 @@ Description of columns in `SAMPLE_ID.gene_statistics.tsv`, `SAMPLE_ID.gene_stati
 | gene_name             | gene name                                                            |
 | transcript_id         | transcript id                                                        |
 | num_exon_detected     | number of exons detected                                             |
-| num_exon_transcript   | number of exons of the transcript                                    |
+| num_exon_transcript   | number of exons in the transcript                                    |
 | ratio                 | ratio of detected exons to all exons in transcript                   |
 | source_inference      | possible source of detected cDNAs inferred by cDNA-detector          |
 | source_known_databases| known source of detected cDNAs defined by users or built-in databases|
@@ -284,7 +285,7 @@ Description of columns in `SAMPLE_ID.exon_statistics.tsv` and `SAMPLE_ID.exon_st
 | transcript          | transcript name                                                     |
 | num_clipped_start   | number of clipped reads overlapping start of candidate region       |
 | num_total_start     | number of total reads at start position of candidate region         |
-| bbinom_pvalue_start | binomial p-values at start position of candidate region             |
+| bbinom_pvalue_start | binomial p-value at start position of candidate region             |
 | num_clipped_end     | number of clipped reads at end position of candidate region         |
 | num_total_end       | number of total reads at end position of candidate region           |
 | bbinom_pvalue_end   | binomial p-value at end position of candidate region                |
@@ -298,8 +299,8 @@ Description of columns in `SAMPLE_ID.exon_statistics.tsv` and `SAMPLE_ID.exon_st
 
 
 
-### 3. clean up cDNA in DNA-Seq experiment BAM file
-`cdna-detector clean` utilizes `SAMPLE_ID.merge_region.tsv` generated in the previous step `cdna-detector detect` and the source BAM file, then generates a "clean" BAM files by removing identified contaminant reads from candidate regions.
+### 3. clean up cDNA in BAM file
+`cdna-detector clean` utilizes `SAMPLE_ID.merge_region.tsv` generated in the previous step `cdna-detector detect` and the source BAM file, then generates a "clean" BAM file by removing identified contaminant reads from candidate regions.
 
 **Usage**
 ```
@@ -332,7 +333,7 @@ optional arguments:
   --gDNA_remove         by default, reads identified as genomic DNA (gDNA) will be kept in exon regions. If the user suspects all reads in a given exon are contaminant reads, add this flag
 ```
 
-By default, `cdna-detector clean` estimates the quantity of cDNA in a candidate region based on cDNA detected in exon boundaries. Sometimes, this is not accurate. In this case, the user has the option to set `method` to rpm or fraction to estimate quantity of cDNA manually (i.e after alignment review in IGV). This can be useful when all reads in a candidate exon regions stem from contaminating cDNA.
+By default, `cdna-detector clean` estimates the fraction of cDNA in a candidate region based on cDNA detected in exon boundaries. Sometimes, this is not accurate. In this case, the user has the option to set `method` to rpm or fraction to estimate quantity of cDNA manually (i.e after alignment review in IGV). This can be useful when all reads in a candidate exon regions stem from contaminating cDNA.
 
 ```
 cdna-detector clean --bam example_data/bam_file/tmp.sample.bam  --sample_id tmp_sample --region example_data/output_detect/tmp_sample.merge_region.tsv   --output_dir example_data/output_clean
@@ -343,8 +344,8 @@ cdna-detector clean --bam example_data/bam_file/tmp.sample.bam  --sample_id tmp_
 `cdna-detector clean` outputs 4 files:
 
 1. `SAMPLEID.clean.log`: log file.
-2. `SAMPLEID.clean.bam`: clean bam file.
-3. `SAMPLEID.clean.bam`: index of clean bam file.
+2. `SAMPLEID.clean.bam`: clean BAM file.
+3. `SAMPLEID.clean.bam`: index for clean BAM file.
 4. `SAMPLEID.clean_region.tsv`: cleaned regions and detailed information about how much cDNA was removed in each region. Useful for manual cDNA removal. [ If `method` is rpm or fraction, this file will not be generated ]
 
 Example `SAMPLEID.clean_region.tsv`.
