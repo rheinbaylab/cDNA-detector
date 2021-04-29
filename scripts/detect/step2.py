@@ -235,22 +235,25 @@ def detect_cdna(global_para):
 
 
     df_stat_all_transcript = df_stat_all_transcript.merge(df_table_blastn_source, how = 'left', on = "gene_name")
+    df_stat_all_transcript = df_stat_all_transcript.sort_values(by = ['median_cDNA','avg_pvalue'], ascending=[False, True])
     df_stat_all_transcript.to_csv(global_para.out_gene_stat,index = False, sep = "\t")
 
 
 
     ## 6.3 filter gene and exon information
-    df_stat_all_transcript_filter = df_stat_all_transcript.query('ratio>=@global_para.cutoff_ratio_gene')
+    df_stat_all_transcript_filter = df_stat_all_transcript.query('ratio>=@global_para.cutoff_ratio_gene').query('median_cDNA>=@global_para.cutoff_num_exon_unaligned_reads')
     f_if_0cdna(df_stat_all_transcript_filter)
     list_transcript_filter = df_stat_all_transcript_filter.transcript_id.unique().tolist()
     df_stat_all_region_filter = df_stat_all_region[df_stat_all_region.apply(lambda x:str_list_compare(list_transcript_filter, x.transcript_id),axis = 1)]
     df_stat_all_region_filter.to_csv(global_para.out_exon_stat_filter, sep = '\t', index = False)
+    df_stat_all_transcript_filter = df_stat_all_transcript_filter.sort_values(by = ['median_cDNA','avg_pvalue'], ascending=[False, True])
     df_stat_all_transcript_filter.to_csv(global_para.out_gene_stat_filter,index = False, sep = "\t")
 
 
     ## code for filter source inference
     f_if_0cdna(df_stat_all_transcript_filter)
     df_stat_all_transcript_filter_source_filter = f_filter_by_source(df_stat_all_transcript_filter)
+    df_stat_all_transcript_filter_source_filter = df_stat_all_transcript_filter_source_filter.sort_values(by = ['median_cDNA','avg_pvalue'], ascending=[False, True])
     df_stat_all_transcript_filter_source_filter.to_csv(global_para.out_gene_stat_filter_source,index = False, sep = "\t")
     f_if_0cdna(df_stat_all_transcript_filter_source_filter)
 

@@ -39,7 +39,8 @@ def detect(args):
 	global_para.min_quality = int(args.min_quality)
 	global_para.output_dir = args.output_dir
 	global_para.n_threads = int(args.n_threads)
-	global_para.cutoff_num_exon_unaligned_reads = args.min_exon_cdna_reads
+	global_para.cutoff_num_exon_unaligned_reads = args.median_exon_cdna_reads
+	global_para.num_initial_potential_cdna = args.num_initial_potential_cdna
 	global_para.cutoff_pvalue = args.pvalue
 	global_para.cutoff_ratio_gene = args.min_ratio
 	global_para.exclude_ehc = True if args.exclude_ehc == "True" else False
@@ -135,7 +136,8 @@ Example:
 	parser_b.add_argument('--min_ratio_transcript',dest = "min_ratio",metavar = "", type = float, default = 0.3, help = "minimum ratio of detected exons of one transcript\n- float\n- default: 0.3")
 	parser_b.add_argument('--output_dir',metavar = "", default = '.', help = 'output directory\n- default: "."')
 	parser_b.add_argument('--n_threads',metavar = "", type = int, default = 1, help = 'number of threads\n- integer\n- default: 1')
-	parser_b.add_argument('--min_exon_cdna_reads',metavar = "", type = int, default = 3,  help='minimum number of reads which may come from cDNA for each exon.\n- integer\n- default: 1')
+	parser_b.add_argument('--median_exon_cdna_reads',metavar = "", type = int, default = 0,  help='minimum median number of reads which may come from cDNA for each exon.\n- integer\n- default: 0')
+	parser_b.add_argument('--num_initial_potential_cdna',metavar = "", type = int, default = 500,  help='minimum number of potential cDNAs which should be evaluated .\n- integer\n- default: 500')
 	parser_b.add_argument('--exclude_ehc',default = "True", choices = ["True", "False"], help='to exclude extremely high coverage of clipped reads for single gene from background calculation.\n- string\n- default: True')
 	parser_b.add_argument('--ratio_ehc',metavar = "", type = float, default = 0.05,  help='cutoff for ratio of extremely high coverage of clipped reads for single gene.\n- float\n- default: 0.05')
 	parser_b.add_argument('--count_ehc',metavar = "", type = float, default = 10000,  help='cutoff for read count of extremely high coverage of clipped reads for single gene.\n- integer\n- default: 10000')

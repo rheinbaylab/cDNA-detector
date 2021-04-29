@@ -173,6 +173,12 @@ def f_df_add_region(df):
 
 
 def f_get_ratio_unaligned(global_para):
+    if global_para.num_unalign_read == 0:
+        global_para.logger.info('No clipped reads in exon regions')
+        f_0cdna()
+    if global_para.num_total_read_exon == 0:
+        global_para.logger.info('No reads in exon regions')
+        f_0cdna()
     if global_para.num_total_read_exon>0:
         p_unalign_read = global_para.num_unalign_read/global_para.num_total_read_exon
     else:
@@ -199,7 +205,10 @@ def f_filter_genelist_step1(df_transcript_exon, df_gene_exon):
     else:
         tmp_genelist_filter1 = df_gene_exon_expand.query('fdr_transcript<=@global_para.cutoff_pvalue').gene_name.unique().tolist()
         if len(tmp_genelist_filter1)<=500:
-            tmp_genelist_filter = tmp_genelist_filter1
+            if len(tmp_genelist_filter1) >0:
+                tmp_genelist_filter = tmp_genelist_filter1
+            else:
+                tmp_genelist_filter = df_gene_exon_expand.sort_values('pvalue_transcript')['gene_name'].unique()[0:global_para.num_initial_potential_cdna].tolist()
         else:
             df_gene_exon_expand_filter = df_gene_exon_expand.query('gene_name in @tmp_genelist_filter1') 
             df_gene_exon_expand_filter['n_transcript'] = df_gene_exon_expand_filter.groupby(['transcript_id'])['transcript_id'].transform('count')
@@ -209,7 +218,7 @@ def f_filter_genelist_step1(df_transcript_exon, df_gene_exon):
             df_gene_exon_expand_filter = df_gene_exon_expand_filter.query('ratio>=@global_para.cutoff_ratio_gene')
             tmp_genelist_filter = df_gene_exon_expand_filter.gene_name.unique().tolist()
             if len(df_gene_exon_expand_filter.gene_name.unique())>=500:
-                tmp_genelist_filter = df_gene_exon_expand_filter.sort_values('fdr_transcript')['gene_name'].unique()[0:500].tolist()
+                tmp_genelist_filter = df_gene_exon_expand_filter.sort_values('fdr_transcript')['gene_name'].unique()[0:global_para.num_initial_potential_cdna].tolist()
     f_if_0cdna(tmp_genelist_filter)
     return tmp_genelist_filter
 
@@ -265,7 +274,7 @@ def f_expand_by_transcript(df_gene_exon_unique):
     sum_transcript.name = 'read_transcript'
     df_transcript = pd.concat([n_transcript,sum_transcript],axis = 1)
     df_gene_exon_unique_expand = df_gene_exon_unique_expand.merge(df_transcript,left_on = 'transcript_split',right_index = True)
-    df_gene_exon_unique_expand['cutoff_transcript_read'] = global_para.cutoff_num_exon_unaligned_reads*df_gene_exon_unique_expand.n_transcript
+    # df_gene_exon_unique_expand['cutoff_transcript_read'] = global_para.cutoff_num_exon_unaligned_reads*df_gene_exon_unique_expand.n_transcript
     return(df_gene_exon_unique_expand)
 
 
