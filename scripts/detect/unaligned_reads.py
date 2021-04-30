@@ -203,7 +203,7 @@ def f_filter_genelist_step1(df_transcript_exon, df_gene_exon):
     tmp_df['fdr_transcript'] = fdrcorrection(tmp_df['pvalue_transcript'])[1]
     df_gene_exon_expand = df_gene_exon_expand.merge(tmp_df.filter(['transcript_id','fdr_transcript']))
     tmp_genelist_filter1 = df_gene_exon_expand.query('pvalue_transcript<=@global_para.cutoff_pvalue').gene_name.unique().tolist()
-    if len(tmp_genelist_filter1) <= 100:
+    if len(tmp_genelist_filter1) <= 500:
         tmp_genelist_filter = tmp_genelist_filter1
     else:
         tmp_genelist_filter1 = df_gene_exon_expand.query('fdr_transcript<=@global_para.cutoff_pvalue').gene_name.unique().tolist()
@@ -211,7 +211,8 @@ def f_filter_genelist_step1(df_transcript_exon, df_gene_exon):
             if len(tmp_genelist_filter1) >0:
                 tmp_genelist_filter = tmp_genelist_filter1
             else:
-                tmp_genelist_filter = df_gene_exon_expand.sort_values('pvalue_transcript')['gene_name'].unique()[0:global_para.num_initial_potential_cdna].tolist()
+                df_gene_exon_expand_filter = df_gene_exon_expand.query('pvalue_transcript<=@global_para.cutoff_pvalue')
+                tmp_genelist_filter = df_gene_exon_expand_filter.sort_values('pvalue_transcript')['gene_name'].unique()[0:global_para.num_initial_potential_cdna].tolist()
         else:
             df_gene_exon_expand_filter = df_gene_exon_expand.query('gene_name in @tmp_genelist_filter1') 
             df_gene_exon_expand_filter['n_transcript'] = df_gene_exon_expand_filter.groupby(['transcript_id'])['transcript_id'].transform('count')
@@ -220,8 +221,10 @@ def f_filter_genelist_step1(df_transcript_exon, df_gene_exon):
             df_gene_exon_expand_filter['ratio'] = df_gene_exon_expand_filter.apply(lambda x:x.n_transcript_detect/x.n_transcript,axis = 1)
             df_gene_exon_expand_filter = df_gene_exon_expand_filter.query('ratio>=@global_para.cutoff_ratio_gene')
             tmp_genelist_filter = df_gene_exon_expand_filter.gene_name.unique().tolist()
-            if len(df_gene_exon_expand_filter.gene_name.unique())>=500:
+            if len(df_gene_exon_expand_filter.gene_name.unique())>=global_para.num_initial_potential_cdna:
                 tmp_genelist_filter = df_gene_exon_expand_filter.sort_values('fdr_transcript')['gene_name'].unique()[0:global_para.num_initial_potential_cdna].tolist()
+                global_para.logger.info('number of potential cDNAs is greater than cutoff')
+                global_para.logger.info('select top %d cDNAs to evaluate, max pvalue of selective cDNAs across transcript is:%0.6f'%(len(tmp_genelist_filter),max(df_gene_exon_expand_filter['pvalue_transcript'])))
     f_if_0cdna(tmp_genelist_filter)
     return tmp_genelist_filter
 
