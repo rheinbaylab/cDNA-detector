@@ -49,7 +49,8 @@ def cdna_remove_region(global_para):
 	# check file and check directory
 	# 1. decode whole region file
 	all_df_region = pd.read_csv(file_region, sep="\t",header = 0)
-	all_df_region['tmp_region'] = all_df_region.apply(lambda x:x.seqname + ":" + str(x.start) + "-" + str(x.end), axis = 1)
+	all_df_region.seqname = all_df_region.seqname.astype('str')
+	all_df_region['tmp_region'] = all_df_region.apply(lambda x:str(x.seqname) + ":" + str(x.start) + "-" + str(x.end), axis = 1)
 
 
 	# 2. class all reads in exon regions into a big dictionary

@@ -299,6 +299,7 @@ def detect_cdna(global_para):
     f_generate_bed(df_region_stat_bed_merge)
     del(df_region_stat_bed_merge['region'])
     df_region_stat_bed_merge.to_csv(global_para.out_bed_merge, sep = "\t", index = False)
+    f_warning_merge_region(df_region_stat_bed_merge)
 
 
     # 7. tell users information

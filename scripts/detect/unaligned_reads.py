@@ -34,6 +34,14 @@ def f_if_0cdna(obj):
     if len(obj) == 0:
         f_0cdna()
 
+def f_warning_merge_region(df_region):
+    # df_region = df_region_stat_bed_merge.copy()
+    df_region['diff'] =abs( df_region.start - df_region.end)
+    df_region_diff = df_region[df_region['diff']>10000]
+    del df_region_diff['diff']
+    if len(df_region_diff)>0:
+        global_para.logger.warning("%d extreme long regions are detected (>10 kb), please check results carefully"%len(df_region_diff))
+        global_para.logger.info(df_region_diff)
 
 
 def read_gene_model(gtf_gene_unique_file):
@@ -222,9 +230,10 @@ def f_filter_genelist_step1(df_transcript_exon, df_gene_exon):
             df_gene_exon_expand_filter = df_gene_exon_expand_filter.query('ratio>=@global_para.cutoff_ratio_gene')
             tmp_genelist_filter = df_gene_exon_expand_filter.gene_name.unique().tolist()
             if len(df_gene_exon_expand_filter.gene_name.unique())>=global_para.num_initial_potential_cdna:
-                tmp_genelist_filter = df_gene_exon_expand_filter.sort_values('fdr_transcript')['gene_name'].unique()[0:global_para.num_initial_potential_cdna].tolist()
-                global_para.logger.info('number of potential cDNAs is greater than cutoff')
-                global_para.logger.info('select top %d cDNAs to evaluate, max pvalue of selective cDNAs across transcript is:%0.6f'%(len(tmp_genelist_filter),max(df_gene_exon_expand_filter['pvalue_transcript'])))
+                df_gene_exon_expand_filter_sort_uniq = df_gene_exon_expand_filter.sort_values('fdr_transcript').drop_duplicates(subset = 'gene_name')
+                tmp_genelist_filter = df_gene_exon_expand_filter_sort_uniq['gene_name'].unique()[0:global_para.num_initial_potential_cdna].tolist()
+                global_para.logger.info('number of potential cDNAs is %d, it is greater than cutoff'%len(df_gene_exon_expand_filter_sort_uniq))
+                global_para.logger.info('select top %d cDNAs to evaluate, max pvalue of selective cDNAs across transcript is:%0.6f'%(len(tmp_genelist_filter),max(df_gene_exon_expand_filter_sort_uniq.query('gene_name in @tmp_genelist_filter')['pvalue_transcript'])))
     f_if_0cdna(tmp_genelist_filter)
     return tmp_genelist_filter
 

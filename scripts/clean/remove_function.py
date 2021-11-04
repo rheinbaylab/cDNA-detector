@@ -194,7 +194,8 @@ def reads_remove_automatic(exon_readlist_raw,exon_readlist_pos_type,exon_readlis
 		n_uDNA_remove = n_uDNA_exon
 		exon_readlist_remove = exon_readlist_raw
 	else:
-		if (n_gDNA_edge + n_cDNA_edge) - n_cDNA_exon == 0:
+		# if (n_gDNA_edge + n_cDNA_edge) - n_cDNA_exon == 0:
+		if any([(n_gDNA_edge + n_cDNA_edge) - n_cDNA_exon == 0, n_gDNA_edge + n_cDNA_edge == 0]):
 			n_uDNA_remove = 0
 		else:
 			n_uDNA_remove = round(n_exon_raw*n_cDNA_edge/(n_gDNA_edge + n_cDNA_edge) - n_cDNA_exon)

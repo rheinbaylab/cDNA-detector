@@ -65,7 +65,9 @@ def exon_end_adj_get_unalign(df_exon):
 def exon_adj_get_mate(read_list):
     bamFile_handle = pysam.Samfile(global_para.genome_bam_file,'rb')
     unalign_readlist_true_mate = list()
-    for read in read_list:
+    read_list_new = [read for read in read_list if read.is_proper_pair]
+    # for read in read_list:
+    for read in read_list_new: # add
         try:
             read_mate = bamFile_handle.mate(read)
             unalign_readlist_true_mate.append(read_mate)
@@ -188,7 +190,6 @@ def exon_start_adj(df_exon):
                     df_exon_return.pos_start = unalign_readlist_pos[1]
                     df_exon_return = f_recount_unalign(df_exon_return,"start")
                   df_exon_return.abs_d_start = abs(df_exon_return.pos_start - df_exon_return.start)
-
     return(df_exon_return)
 
 
