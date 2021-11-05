@@ -371,8 +371,9 @@ Description of columns in `SAMPLEID.clean_region.tsv`
 | fraction            | fraction of reads kept in the clean bam file                        |
 
 ## Citation
-```
-```
+If you use the tool in your work, please cite:
+> Qi M, Nayar U, Ludwig LS, Wagle N, Rheinbay E. 2021. [cDNA-detector: Detection and removal of cDNA contamination in DNA sequencing libraries](http://dx.doi.org/10.1101/2021.08.11.455962). bioRxiv doi: 10.1101/2021.08.11.455962
+
 ## Getting Help
 
 If you have any questions, please submit issues via GitHub or send email to mqi3@mgh.harvard.edu.
